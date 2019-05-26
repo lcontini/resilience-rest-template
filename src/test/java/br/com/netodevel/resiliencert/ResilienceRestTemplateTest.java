@@ -30,7 +30,7 @@ public class ResilienceRestTemplateTest {
         resilienceRestTemplate.configure(new RestTemplate());
         resilienceRestTemplate.configureProxy(restOperations);
 
-        resilienceRestTemplate.get("http://localhost:8080/posts", PostResponse.class)
+        resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
                 .retry(2)
                 .start();
 
@@ -47,7 +47,7 @@ public class ResilienceRestTemplateTest {
         resilienceRestTemplate.configure(new RestTemplate());
         resilienceRestTemplate.configureProxy(restOperations);
 
-        resilienceRestTemplate.get("http://localhost:8080/posts", PostResponse.class)
+        resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
                 .start();
 
         verify(restOperations, times(0))

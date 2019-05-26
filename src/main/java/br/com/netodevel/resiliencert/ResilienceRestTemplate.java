@@ -35,7 +35,7 @@ public class ResilienceRestTemplate {
         restTemplate.setMessageConverters(MessageConvert.convertJackson());
     }
 
-    public <T> ResilienceRestTemplate get(String url, Class<T> response) {
+    public <T> ResilienceRestTemplate getForEntity(String url, Class<T> response) {
         requestTracker = new RequestTracker();
         requestTracker.setUrl(url);
         requestTracker.setResponseClass(response);
