@@ -54,5 +54,4 @@ public class ResilienceRestTemplateTest {
                 .getForEntity(eq("http://localhost:8080/posts"),
                         anyObject());
     }
-
 }
