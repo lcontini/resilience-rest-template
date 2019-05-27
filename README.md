@@ -7,14 +7,23 @@ This project in progress.
 
 ### Operations
 
-    * Retry (doing)
-    * Cache (Todo)
+    * Retry (Done)
+    * Cache (Doing)
     * Fallback (Todo)
 
-### Retry Sample
+### Goal
 
 ```java
-resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
+
+   @Autowired
+   private ResilienceRestTemplate resilienceRestTemplate;
+
+   public ResponseEntity<?> getPosts() {
+     return resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
                 .retry(2)
+                .cache(Duration.ofSeconds(15))
+                .fallback(APIErrorException::new)
                 .start();
+   }
+   
 ```
