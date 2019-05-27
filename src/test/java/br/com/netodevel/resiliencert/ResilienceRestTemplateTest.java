@@ -2,10 +2,15 @@ package br.com.netodevel.resiliencert;
 
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class ResilienceRestTemplateTest {
@@ -54,4 +59,48 @@ public class ResilienceRestTemplateTest {
                 .getForEntity(eq("http://localhost:8080/posts"),
                         anyObject());
     }
+
+    @Test
+    public void when_cache_enable_then_not_invoke_retry() {
+        RestOperations restOperations = mock(RestOperations.class);
+        CacheManager cacheManager = new CacheManager();
+        cacheManager.insertCache("http://localhost:8080/posts",
+                new ResponseEntity<>(new PostResponse(), HttpStatus.OK));
+
+        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate();
+        resilienceRestTemplate.configure(new RestTemplate());
+        resilienceRestTemplate.configureProxy(restOperations);
+        resilienceRestTemplate.configureCache(cacheManager);
+
+        resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
+                .cache(Duration.ofSeconds(10))
+                .retry(2)
+                .start();
+
+        verify(restOperations, times(0))
+                .getForEntity(eq("http://localhost:8080/posts"), anyObject());
+    }
+
+    @Test
+    public void when_cache_enable_then_return_title() {
+        RestOperations restOperations = mock(RestOperations.class);
+
+        CacheManager cacheManager = new CacheManager();
+        cacheManager.insertCache("http://localhost:8080/posts",
+                new ResponseEntity<>(new PostResponse("id", "title-xpto"), HttpStatus.OK));
+
+        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate();
+        resilienceRestTemplate.configure(new RestTemplate());
+        resilienceRestTemplate.configureProxy(restOperations);
+        resilienceRestTemplate.configureCache(cacheManager);
+
+        ResponseEntity<PostResponse> response =
+                resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
+                .cache(Duration.ofSeconds(10))
+                .retry(2)
+                .start();
+
+        assertEquals("title-xpto", response.getBody().getTitle());
+    }
+
 }

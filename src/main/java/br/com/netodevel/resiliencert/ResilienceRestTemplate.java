@@ -5,6 +5,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
+
 /**
  * This class represent a wrapper for resilience operations
  * on top of RestTemplate
@@ -25,6 +27,15 @@ public class ResilienceRestTemplate {
      * Interface for proxy rest template
      */
     private RestOperations restOperationToProxy;
+
+    /**
+     * Cache Manager
+     */
+    private CacheManager cacheManager;
+
+    public void configureCache(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
+    }
 
     public void configureProxy(RestOperations restOperations) {
         this.restOperationToProxy = restOperations;
@@ -49,10 +60,22 @@ public class ResilienceRestTemplate {
     }
 
     public <T> ResponseEntity<T> start() throws RestClientException {
+        if (requestTracker.getCacheEnable()) {
+            Object object = cacheManager.getCacheValue(requestTracker.getUrl());
+            if (object != null) return (ResponseEntity<T>) object;
+        }
+
         if (requestTracker.getRetryEnable()) {
             return restOperationToProxy.getForEntity(requestTracker.getUrl(), requestTracker.getResponseClass());
         }
+
         return restTemplate.getForEntity(requestTracker.getUrl(), requestTracker.getResponseClass());
+    }
+
+    public ResilienceRestTemplate cache(Duration duration) {
+        requestTracker.setCacheEnable(true);
+        requestTracker.setCacheDuration(duration);
+        return this;
     }
 
 }

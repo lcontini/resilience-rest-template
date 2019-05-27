@@ -8,7 +8,7 @@ public class RequestTracker<T> {
     private String url;
     private Integer numberOfAttempts;
     private Boolean retryEnable = Boolean.FALSE;
-    private Boolean cacheEnable;
+    private Boolean cacheEnable = Boolean.FALSE;
     private Duration cacheDuration;
 
     public String getUrl() {
