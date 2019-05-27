@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 public class ResilienceRestTemplateTest {
@@ -23,17 +24,16 @@ public class ResilienceRestTemplateTest {
 
         final RestTemplate restTemplate = context.getBean(RestTemplate.class);
 
-        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate();
-        resilienceRestTemplate.configure(restTemplate);
+        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate(restTemplate);
+        assertNotNull(resilienceRestTemplate.getRestTemplate());
     }
 
     @Test
     public void when_retry_enable_then_invoke_proxy() {
         RestOperations restOperations = mock(RestOperations.class);
 
-        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate();
-        resilienceRestTemplate.configure(new RestTemplate());
-        resilienceRestTemplate.configureProxy(restOperations);
+        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate(new RestTemplate(), restOperations);
+        resilienceRestTemplate.configureJacksonConvert();
 
         resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
                 .retry(2)
@@ -48,9 +48,8 @@ public class ResilienceRestTemplateTest {
     public void when_retry_disable_then_not_invoke_proxy() {
         RestOperations restOperations = mock(RestOperations.class);
 
-        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate();
-        resilienceRestTemplate.configure(new RestTemplate());
-        resilienceRestTemplate.configureProxy(restOperations);
+        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate(new RestTemplate(), restOperations);
+        resilienceRestTemplate.configureJacksonConvert();
 
         resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
                 .start();
@@ -63,14 +62,13 @@ public class ResilienceRestTemplateTest {
     @Test
     public void when_cache_enable_then_not_invoke_retry() {
         RestOperations restOperations = mock(RestOperations.class);
+
         CacheManager cacheManager = new CacheManager();
         cacheManager.insertCache("http://localhost:8080/posts",
                 new ResponseEntity<>(new PostResponse(), HttpStatus.OK));
 
-        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate();
-        resilienceRestTemplate.configure(new RestTemplate());
-        resilienceRestTemplate.configureProxy(restOperations);
-        resilienceRestTemplate.configureCache(cacheManager);
+        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate(new RestTemplate(), restOperations, cacheManager);
+        resilienceRestTemplate.configureJacksonConvert();
 
         resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
                 .cache(Duration.ofSeconds(10))
@@ -89,16 +87,14 @@ public class ResilienceRestTemplateTest {
         cacheManager.insertCache("http://localhost:8080/posts",
                 new ResponseEntity<>(new PostResponse("id", "title-xpto"), HttpStatus.OK));
 
-        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate();
-        resilienceRestTemplate.configure(new RestTemplate());
-        resilienceRestTemplate.configureProxy(restOperations);
-        resilienceRestTemplate.configureCache(cacheManager);
+        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate(new RestTemplate(), restOperations, cacheManager);
+        resilienceRestTemplate.configureJacksonConvert();
 
         ResponseEntity<PostResponse> response =
                 resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
-                .cache(Duration.ofSeconds(10))
-                .retry(2)
-                .start();
+                        .cache(Duration.ofSeconds(10))
+                        .retry(2)
+                        .start();
 
         assertEquals("title-xpto", response.getBody().getTitle());
     }

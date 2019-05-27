@@ -33,17 +33,23 @@ public class ResilienceRestTemplate {
      */
     private CacheManager cacheManager;
 
-    public void configureCache(CacheManager cacheManager) {
+    public ResilienceRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    public ResilienceRestTemplate(RestTemplate restTemplate, RestOperations restOperationToProxy, CacheManager cacheManager) {
+        this.restTemplate = restTemplate;
+        this.restOperationToProxy = restOperationToProxy;
         this.cacheManager = cacheManager;
     }
 
-    public void configureProxy(RestOperations restOperations) {
+    public ResilienceRestTemplate(RestTemplate restTemplate, RestOperations restOperations) {
+        this.restTemplate = restTemplate;
         this.restOperationToProxy = restOperations;
     }
 
-    public void configure(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-        restTemplate.setMessageConverters(MessageConvert.convertJackson());
+    public void configureJacksonConvert() {
+        if (this.restTemplate != null) restTemplate.setMessageConverters(MessageConvert.convertJackson());
     }
 
     public <T> ResilienceRestTemplate getForEntity(String url, Class<T> response) {
@@ -78,4 +84,7 @@ public class ResilienceRestTemplate {
         return this;
     }
 
+    public RestTemplate getRestTemplate() {
+        return this.restTemplate;
+    }
 }
