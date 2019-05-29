@@ -72,10 +72,15 @@ public class ResilienceRestTemplate {
         }
 
         if (requestTracker.getRetryEnable()) {
-            return restOperationToProxy.getForEntity(requestTracker.getUrl(), requestTracker.getResponseClass());
+            ResponseEntity<T> responseEntity = restOperationToProxy.getForEntity(requestTracker.getUrl(), requestTracker.getResponseClass());
+            if (responseEntity != null) cacheManager.insertCache(requestTracker.getUrl(), responseEntity.getBody());
+
+            return responseEntity;
         }
 
-        return restTemplate.getForEntity(requestTracker.getUrl(), requestTracker.getResponseClass());
+        ResponseEntity<T> responseEntity = restTemplate.getForEntity(requestTracker.getUrl(), requestTracker.getResponseClass());
+        cacheManager.insertCache(requestTracker.getUrl(), responseEntity.getBody());
+        return responseEntity;
     }
 
     public ResilienceRestTemplate cache(Duration duration) {
@@ -86,5 +91,9 @@ public class ResilienceRestTemplate {
 
     public RestTemplate getRestTemplate() {
         return this.restTemplate;
+    }
+
+    protected CacheManager getCacheManager() {
+        return cacheManager;
     }
 }
