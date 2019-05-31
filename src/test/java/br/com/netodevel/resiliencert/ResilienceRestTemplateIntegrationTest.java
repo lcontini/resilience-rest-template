@@ -44,7 +44,7 @@ public class ResilienceRestTemplateIntegrationTest {
 
         ResponseEntity<PostResponse> response = resilienceRestTemplate
                 .getForEntity("http://localhost:8080/posts", PostResponse.class)
-                .start();
+                .call();
 
         assertNotNull(response);
     }
@@ -67,7 +67,7 @@ public class ResilienceRestTemplateIntegrationTest {
         ResponseEntity<PostResponse> response = resilienceRestTemplate
                 .getForEntity("http://localhost:8080/posts", PostResponse.class)
                 .retry(2)
-                .start();
+                .call();
 
         assertNotNull(response);
     }

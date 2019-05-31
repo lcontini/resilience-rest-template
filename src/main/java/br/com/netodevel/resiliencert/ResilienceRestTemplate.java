@@ -65,7 +65,7 @@ public class ResilienceRestTemplate {
         return this;
     }
 
-    public <T> ResponseEntity<T> start() throws RestClientException {
+    public <T> ResponseEntity<T> call() throws RestClientException {
         if (requestTracker.getCacheEnable()) {
             Object object = cacheManager.getCacheValue(requestTracker.getUrl());
             if (object != null) return (ResponseEntity<T>) object;

@@ -14,8 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -44,7 +43,7 @@ public class ResilienceRestTemplateTest {
 
         resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
                 .retry(2)
-                .start();
+                .call();
 
         verify(restOperations, times(1))
                 .getForEntity(eq("http://localhost:8080/posts"),
@@ -59,7 +58,7 @@ public class ResilienceRestTemplateTest {
         resilienceRestTemplate.configureJacksonConvert();
 
         resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
-                .start();
+                .call();
 
         verify(restOperations, times(0))
                 .getForEntity(eq("http://localhost:8080/posts"),
@@ -80,7 +79,7 @@ public class ResilienceRestTemplateTest {
         resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
                 .cache(Duration.ofSeconds(10))
                 .retry(2)
-                .start();
+                .call();
 
         verify(restOperations, times(0))
                 .getForEntity(eq("http://localhost:8080/posts"), anyObject());
@@ -101,7 +100,7 @@ public class ResilienceRestTemplateTest {
                 resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
                         .cache(Duration.ofSeconds(10))
                         .retry(2)
-                        .start();
+                        .call();
 
         assertEquals("title-xpto", response.getBody().getTitle());
     }
@@ -129,11 +128,10 @@ public class ResilienceRestTemplateTest {
         resilienceRestTemplate
                 .getForEntity("http://localhost:8080/posts", PostResponse.class)
                 .cache(Duration.ofSeconds(3))
-                .start();
+                .call();
 
         PostResponse postResponse = (PostResponse) resilienceRestTemplate.getCacheManager().getCacheValue("http://localhost:8080/posts");
         assertEquals("Title", postResponse.getTitle());
     }
-
 
 }

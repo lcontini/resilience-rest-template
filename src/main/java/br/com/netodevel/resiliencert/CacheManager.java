@@ -14,4 +14,8 @@ public class CacheManager {
     public Object getCacheValue(String key) {
         return this.cacheReponse.get(key);
     }
+
+    public void removeObject(String key) {
+        this.cacheReponse.remove(key);
+    }
 }
