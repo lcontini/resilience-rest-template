@@ -33,8 +33,20 @@ public class ResilienceRestTemplate {
      */
     private CacheManager cacheManager;
 
+    /**
+     * Cache Scheduler
+     */
+    private CacheScheduler cacheScheduler;
+
     public ResilienceRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    public ResilienceRestTemplate(RestTemplate restTemplate, RestOperations restOperationToProxy, CacheManager cacheManager, CacheScheduler cacheScheduler) {
+        this.restTemplate = restTemplate;
+        this.restOperationToProxy = restOperationToProxy;
+        this.cacheManager = cacheManager;
+        this.cacheScheduler = cacheScheduler;
     }
 
     public ResilienceRestTemplate(RestTemplate restTemplate, RestOperations restOperationToProxy, CacheManager cacheManager) {
@@ -67,6 +79,8 @@ public class ResilienceRestTemplate {
 
     public <T> ResponseEntity<T> call() throws RestClientException {
         if (requestTracker.getCacheEnable()) {
+            createCacheScheduler();
+
             Object object = cacheManager.getCacheValue(requestTracker.getUrl());
             if (object != null) return (ResponseEntity<T>) object;
         }
@@ -81,6 +95,17 @@ public class ResilienceRestTemplate {
         ResponseEntity<T> responseEntity = restTemplate.getForEntity(requestTracker.getUrl(), requestTracker.getResponseClass());
         cacheManager.insertCache(requestTracker.getUrl(), responseEntity.getBody());
         return responseEntity;
+    }
+
+    private void createCacheScheduler() {
+        if (this.cacheScheduler != null) {
+            CacheObject cacheObject = new CacheObject();
+            cacheObject.setKey(requestTracker.getUrl());
+            cacheObject.setTimeToLive(requestTracker.getCacheDuration());
+
+            cacheScheduler.setCacheManager(this.cacheManager);
+            cacheScheduler.cronJob(cacheObject);
+        }
     }
 
     public ResilienceRestTemplate cache(Duration duration) {

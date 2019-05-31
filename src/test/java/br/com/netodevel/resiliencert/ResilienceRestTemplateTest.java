@@ -134,4 +134,62 @@ public class ResilienceRestTemplateTest {
         assertEquals("Title", postResponse.getTitle());
     }
 
+    @Test
+    public void when_cache_expired_should_return_null() throws InterruptedException {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(RestTemplate.class);
+        context.register(ResilienceRestTemplateAutoConfiguration.class);
+        context.refresh();
+
+        RestTemplate restTemplate = context.getBean(RestTemplate.class);
+        ResilienceRestTemplate resilienceRestTemplate = context.getBean(ResilienceRestTemplate.class);
+
+        MockRestServiceServer mockRestServiceServer = MockRestServiceServer.createServer(restTemplate);
+
+        JSONObject mockResponse = new JSONObject();
+        mockResponse.put("id", "XYZ");
+        mockResponse.put("title", "Title");
+
+        mockRestServiceServer.expect(requestTo("http://localhost:8080/posts"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(mockResponse.toString(), MediaType.APPLICATION_JSON));
+
+        resilienceRestTemplate
+                .getForEntity("http://localhost:8080/posts", PostResponse.class)
+                .cache(Duration.ofSeconds(3))
+                .call();
+
+        Thread.sleep(3100);
+        assertNull(resilienceRestTemplate.getCacheManager().getCacheValue("http://localhost:8080/posts"));
+    }
+
+    @Test
+    public void when_cache_not_expired_should_return_value() throws InterruptedException {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(RestTemplate.class);
+        context.register(ResilienceRestTemplateAutoConfiguration.class);
+        context.refresh();
+
+        RestTemplate restTemplate = context.getBean(RestTemplate.class);
+        ResilienceRestTemplate resilienceRestTemplate = context.getBean(ResilienceRestTemplate.class);
+
+        MockRestServiceServer mockRestServiceServer = MockRestServiceServer.createServer(restTemplate);
+
+        JSONObject mockResponse = new JSONObject();
+        mockResponse.put("id", "XYZ");
+        mockResponse.put("title", "Title");
+
+        mockRestServiceServer.expect(requestTo("http://localhost:8080/posts"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(mockResponse.toString(), MediaType.APPLICATION_JSON));
+
+        resilienceRestTemplate
+                .getForEntity("http://localhost:8080/posts", PostResponse.class)
+                .cache(Duration.ofSeconds(3))
+                .call();
+
+        Thread.sleep(2000);
+        assertNotNull(resilienceRestTemplate.getCacheManager().getCacheValue("http://localhost:8080/posts"));
+    }
+
 }

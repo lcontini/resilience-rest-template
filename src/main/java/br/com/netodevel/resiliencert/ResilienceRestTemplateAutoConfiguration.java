@@ -30,7 +30,7 @@ public class ResilienceRestTemplateAutoConfiguration {
                 new Class[]{RestOperations.class},
                 new ProxyRestTemplate(restTemplate()));
 
-        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate(restTemplate(), restOperations, new CacheManager());
+        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate(restTemplate(), restOperations, new CacheManager(), new CacheScheduler());
         resilienceRestTemplate.configureJacksonConvert();
 
         return resilienceRestTemplate;
