@@ -23,7 +23,7 @@ This project in progress.
                 .retry(2)
                 .cache(Duration.ofSeconds(15))
                 .fallback(APIErrorException::new)
-                .start();
+                .call();
    }
    
 ```
