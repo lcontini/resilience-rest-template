@@ -8,22 +8,62 @@ This project in progress.
 ### Operations
 
     * Retry (Done)
-    * Cache (Doing)
+    * Cache (Done)
     * Fallback (Todo)
 
-### Goal
+### Retry 
 
 ```java
 
-   @Autowired
-   private ResilienceRestTemplate resilienceRestTemplate;
+@RestController
+@RequestMapping(value = "/pokemon-species")
+public class PokemonController {
 
-   public ResponseEntity<?> getPosts() {
-     return resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
+    @Autowired
+    private ResilienceRestTemplate resilienceRestTemplate;
+
+    @GetMapping
+    public ResponseEntity<?> getPokemonSpecies() {
+        ResponseEntity<PokemonResponse> pokemonsResponse = resilienceRestTemplate
+                .getForEntity("https://pokeapi.co/api/v2/pokemon-species/", PokemonResponse.class)
                 .retry(2)
-                .cache(Duration.ofSeconds(15))
-                .fallback(APIErrorException::new)
                 .call();
+        return new ResponseEntity<>(pokemonsResponse.getBody(), HttpStatus.OK);
    }
+}
    
 ```
+
+### Cache
+
+```java
+
+@RestController
+@RequestMapping(value = "/pokemon-species")
+public class PokemonController {
+
+    @Autowired
+    private ResilienceRestTemplate resilienceRestTemplate;
+
+    @GetMapping
+    public ResponseEntity<?> getPokemonSpecies() {
+        ResponseEntity<PokemonResponse> pokemonsResponse = resilienceRestTemplate
+                .getForEntity("https://pokeapi.co/api/v2/pokemon-species/", PokemonResponse.class)
+                .cache(Duration.ofSeconds(30))
+                .call();
+        return new ResponseEntity<>(pokemonsResponse.getBody(), HttpStatus.OK);
+   }
+}
+   
+```
+
+Cache logs
+
+```
+b.c.n.resiliencert.CacheScheduler      : cache started for the key: https://pokeapi.co/api/v2/pokemon-species/
+```
+
+```
+b.c.n.resiliencert.CacheScheduler      : cache finalized for the key: https://pokeapi.co/api/v2/pokemon-species/
+```
+
