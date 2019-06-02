@@ -1,11 +1,10 @@
 package br.com.netodevel.resiliencert;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheManager {
 
-    private Map<String, Object> cacheReponse = new HashMap<>();
+    private ConcurrentHashMap<String, Object> cacheReponse = new ConcurrentHashMap<>();
 
     public void insertCache(String key, Object value) {
         this.cacheReponse.put(key, value);
