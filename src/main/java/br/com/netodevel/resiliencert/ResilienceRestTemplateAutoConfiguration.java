@@ -1,5 +1,8 @@
 package br.com.netodevel.resiliencert;
 
+import br.com.netodevel.resiliencert.cache.CacheManager;
+import br.com.netodevel.resiliencert.cache.CacheScheduler;
+import br.com.netodevel.resiliencert.retry.ProxyRestTemplate;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

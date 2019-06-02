@@ -9,6 +9,7 @@ public class RequestTracker<T> {
     private Integer numberOfAttempts;
     private Boolean retryEnable = Boolean.FALSE;
     private Boolean cacheEnable = Boolean.FALSE;
+    private Boolean fallbackEnable = Boolean.FALSE;
     private Duration cacheDuration;
 
     public String getUrl() {
@@ -57,5 +58,13 @@ public class RequestTracker<T> {
 
     public void setResponseClass(Class<T> responseClass) {
         this.responseClass = responseClass;
+    }
+
+    public Boolean getFallbackEnable() {
+        return fallbackEnable;
+    }
+
+    public void setFallbackEnable(Boolean fallbackEnable) {
+        this.fallbackEnable = fallbackEnable;
     }
 }

@@ -2,16 +2,15 @@ package com.example.demoresiliencert;
 
 public class PokemonSpecies {
 
-    private String title;
     private String name;
     private String url;
 
-    public String getTitle() {
-        return title;
+    public PokemonSpecies() {
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public PokemonSpecies(String name, String url) {
+        this.name = name;
+        this.url = url;
     }
 
     public String getName() {

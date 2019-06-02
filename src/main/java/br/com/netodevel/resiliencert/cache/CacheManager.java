@@ -1,4 +1,4 @@
-package br.com.netodevel.resiliencert;
+package br.com.netodevel.resiliencert.cache;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,4 +17,5 @@ public class CacheManager {
     public void removeObject(String key) {
         this.cacheReponse.remove(key);
     }
+
 }

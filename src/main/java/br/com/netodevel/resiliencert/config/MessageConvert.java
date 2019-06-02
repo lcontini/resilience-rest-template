@@ -1,4 +1,4 @@
-package br.com.netodevel.resiliencert;
+package br.com.netodevel.resiliencert.config;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;

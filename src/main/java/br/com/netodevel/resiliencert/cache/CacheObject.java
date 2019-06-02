@@ -1,4 +1,4 @@
-package br.com.netodevel.resiliencert;
+package br.com.netodevel.resiliencert.cache;
 
 import java.time.Duration;
 

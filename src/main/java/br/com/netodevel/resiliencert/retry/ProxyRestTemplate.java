@@ -1,5 +1,6 @@
-package br.com.netodevel.resiliencert;
+package br.com.netodevel.resiliencert.retry;
 
+import br.com.netodevel.resiliencert.RequestMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

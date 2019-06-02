@@ -1,6 +1,6 @@
 package br.com.netodevel.resiliencert;
 
-import javafx.geometry.Pos;
+import br.com.netodevel.resiliencert.cache.CacheManager;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -51,11 +51,11 @@ public class ResilienceRestTemplateTest {
                         anyObject());
     }
 
-    @Test(expected = ResourceAccessException.class)
+    @Test
     public void when_retry_disable_then_not_invoke_proxy() {
         RestOperations restOperations = mock(RestOperations.class);
 
-        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate(new RestTemplate(), restOperations);
+        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate(new RestTemplate(), restOperations, new CacheManager());
         resilienceRestTemplate.configureJacksonConvert();
 
         resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
@@ -191,6 +191,29 @@ public class ResilienceRestTemplateTest {
 
         Thread.sleep(2000);
         assertNotNull(resilienceRestTemplate.getCacheManager().getCacheValue("http://localhost:8080/posts"));
+    }
+
+    @Test
+    public void when_request_ex_should_return_fallback() {
+        RestOperations restOperations = mock(RestOperations.class);
+
+        CacheManager cacheManager = new CacheManager();
+        cacheManager.insertCache("http://localhost:8080/posts",
+                new ResponseEntity<>(new PostResponse(), HttpStatus.OK));
+
+        ResilienceRestTemplate resilienceRestTemplate = new ResilienceRestTemplate(new RestTemplate(), restOperations, cacheManager);
+        resilienceRestTemplate.configureJacksonConvert();
+
+        PostResponse defaultResponse = new PostResponse();
+        defaultResponse.setId("xyz");
+        defaultResponse.setTitle("Title default");
+
+        ResponseEntity<PostResponse> postResponse =
+                resilienceRestTemplate.getForEntity("http://localhost:8080/posts", PostResponse.class)
+                        .fallback(defaultResponse)
+                        .call();
+
+        assertEquals("Title default", postResponse.getBody().getTitle());
     }
 
 }

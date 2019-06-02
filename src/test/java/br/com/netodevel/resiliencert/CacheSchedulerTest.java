@@ -1,5 +1,8 @@
 package br.com.netodevel.resiliencert;
 
+import br.com.netodevel.resiliencert.cache.CacheManager;
+import br.com.netodevel.resiliencert.cache.CacheObject;
+import br.com.netodevel.resiliencert.cache.CacheScheduler;
 import org.junit.Test;
 
 import java.time.Duration;

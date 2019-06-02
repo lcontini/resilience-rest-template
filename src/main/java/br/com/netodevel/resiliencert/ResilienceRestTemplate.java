@@ -1,5 +1,9 @@
 package br.com.netodevel.resiliencert;
 
+import br.com.netodevel.resiliencert.cache.CacheManager;
+import br.com.netodevel.resiliencert.cache.CacheObject;
+import br.com.netodevel.resiliencert.cache.CacheScheduler;
+import br.com.netodevel.resiliencert.config.MessageConvert;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
@@ -37,6 +41,11 @@ public class ResilienceRestTemplate {
      * Cache Scheduler
      */
     private CacheScheduler cacheScheduler;
+
+    /**
+     * Default Manager
+     */
+    private Object defObject;
 
     public ResilienceRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -79,23 +88,28 @@ public class ResilienceRestTemplate {
 
     public <T> ResponseEntity<T> call() throws RestClientException {
         if (requestTracker.getCacheEnable()) {
-
             Object object = cacheManager.getCacheValue(requestTracker.getUrl());
             if (object != null) return (ResponseEntity<T>) object;
         }
 
         if (requestTracker.getRetryEnable()) {
             ResponseEntity<T> responseEntity = restOperationToProxy.getForEntity(requestTracker.getUrl(), requestTracker.getResponseClass());
-            if (responseEntity != null) cacheManager.insertCache(requestTracker.getUrl(), responseEntity.getBody());
-
+            if (responseEntity != null) cacheManager.insertCache(requestTracker.getUrl(), responseEntity);
             return responseEntity;
         }
 
-        ResponseEntity<T> responseEntity = restTemplate.getForEntity(requestTracker.getUrl(), requestTracker.getResponseClass());
-        if (cacheManager.getCacheValue(requestTracker.getUrl()) == null) {
+        ResponseEntity<T> responseEntity = null;
+        try {
+            responseEntity = restTemplate.getForEntity(requestTracker.getUrl(), requestTracker.getResponseClass());
+        } catch (Exception e) {
+            if (this.requestTracker.getFallbackEnable()) return (ResponseEntity<T>) ResponseEntity.ok(defObject);
+        }
+
+        if (cacheManager.getCacheValue(requestTracker.getUrl()) == null && responseEntity != null) {
             cacheManager.insertCache(requestTracker.getUrl(), responseEntity);
             createCacheScheduler();
         }
+
         return responseEntity;
     }
 
@@ -122,5 +136,11 @@ public class ResilienceRestTemplate {
 
     protected CacheManager getCacheManager() {
         return cacheManager;
+    }
+
+    public ResilienceRestTemplate fallback(Object defaultObject) {
+        this.defObject = defaultObject;
+        this.requestTracker.setFallbackEnable(true);
+        return this;
     }
 }
