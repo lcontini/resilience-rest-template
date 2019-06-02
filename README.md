@@ -57,17 +57,13 @@ public class PokemonController {
    
 ```
 
-When started request with cache:
-
-Log when started
+Cache logs
 
 ```
-INFO 21868 --- [nio-8080-exec-1] b.c.n.resiliencert.CacheScheduler        : cache started for the key: https://pokeapi.co/api/v2/pokemon-species/
+b.c.n.resiliencert.CacheScheduler      : cache started for the key: https://pokeapi.co/api/v2/pokemon-species/
 ```
 
-Log when finish
-
 ```
-INFO 21868 --- [       Thread-4] b.c.n.resiliencert.CacheScheduler        : cache finalized for the key: https://pokeapi.co/api/v2/pokemon-species/
+b.c.n.resiliencert.CacheScheduler      : cache finalized for the key: https://pokeapi.co/api/v2/pokemon-species/
 ```
 
