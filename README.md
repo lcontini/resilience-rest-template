@@ -69,6 +69,5 @@ Log when finish
 
 ```
 INFO 21868 --- [       Thread-4] b.c.n.resiliencert.CacheScheduler        : cache finalized for the key: https://pokeapi.co/api/v2/pokemon-species/
-
 ```
 
