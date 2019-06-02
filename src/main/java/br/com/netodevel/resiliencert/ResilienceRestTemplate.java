@@ -79,7 +79,6 @@ public class ResilienceRestTemplate {
 
     public <T> ResponseEntity<T> call() throws RestClientException {
         if (requestTracker.getCacheEnable()) {
-            createCacheScheduler();
 
             Object object = cacheManager.getCacheValue(requestTracker.getUrl());
             if (object != null) return (ResponseEntity<T>) object;
@@ -93,7 +92,10 @@ public class ResilienceRestTemplate {
         }
 
         ResponseEntity<T> responseEntity = restTemplate.getForEntity(requestTracker.getUrl(), requestTracker.getResponseClass());
-        cacheManager.insertCache(requestTracker.getUrl(), responseEntity.getBody());
+        if (cacheManager.getCacheValue(requestTracker.getUrl()) == null) {
+            cacheManager.insertCache(requestTracker.getUrl(), responseEntity);
+            createCacheScheduler();
+        }
         return responseEntity;
     }
 

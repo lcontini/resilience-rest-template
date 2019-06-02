@@ -8,19 +8,26 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
+
 @RestController
 @RequestMapping(value = "/movies")
-public class StarWarsController {
+public class PokemonController {
 
     @Autowired
     private ResilienceRestTemplate resilienceRestTemplate;
 
     @GetMapping
-    public ResponseEntity<?> getMovies() {
-        ResponseEntity<FilmsResponse> filmsResponse = resilienceRestTemplate
-                .getForEntity("https://swapi.co/api/films/", FilmsResponse.class)
+    public ResponseEntity<?> getPokemonSpecies() {
+        Timer timer = new Timer();
+
+        ResponseEntity<PokemonResponse> filmsResponse = resilienceRestTemplate
+                .getForEntity("https://pokeapi.co/api/v2/pokemon-species/", PokemonResponse.class)
+                .cache(Duration.ofSeconds(30))
                 .call();
-        return new ResponseEntity<>(filmsResponse, HttpStatus.OK);
+
+        System.out.println("ms: " + timer.toString());
+        return new ResponseEntity<>(filmsResponse.getBody(), HttpStatus.OK);
     }
 
 }

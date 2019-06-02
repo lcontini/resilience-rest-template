@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 public class CacheScheduler {
 
-    private static Logger log = LoggerFactory.getLogger(ProxyRestTemplate.class);
+    private static Logger log = LoggerFactory.getLogger(CacheScheduler.class);
 
     private CacheManager cacheManager;
 
@@ -17,18 +17,18 @@ public class CacheScheduler {
     }
 
     public void cronJob(CacheObject cacheObject) {
-        log.info("cron job started to key: {}", cacheObject.getKey());
+        log.info("cache started for the key: {}", cacheObject.getKey());
         Thread t = new Thread(() -> {
             while (true) {
                 try {
                     Thread.sleep(cacheObject.getTimeToLive().getSeconds() * 1000);
                 } catch (InterruptedException e) {
-                    log.error("cronJob error: {}", e.getMessage());
+                    log.error("cache error: {}", e.getMessage());
                 }
                 break;
             }
 
-            log.info("cron job finish to key: {}", cacheObject.getKey());
+            log.info("cache finalized for the key: {}", cacheObject.getKey());
             cacheManager.removeObject(cacheObject.getKey());
         });
 

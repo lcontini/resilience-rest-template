@@ -1,5 +1,6 @@
 package br.com.netodevel.resiliencert;
 
+import javafx.geometry.Pos;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -130,8 +131,8 @@ public class ResilienceRestTemplateTest {
                 .cache(Duration.ofSeconds(3))
                 .call();
 
-        PostResponse postResponse = (PostResponse) resilienceRestTemplate.getCacheManager().getCacheValue("http://localhost:8080/posts");
-        assertEquals("Title", postResponse.getTitle());
+        ResponseEntity<PostResponse> postResponse = (ResponseEntity<PostResponse>) resilienceRestTemplate.getCacheManager().getCacheValue("http://localhost:8080/posts");
+        assertEquals("Title", postResponse.getBody().getTitle());
     }
 
     @Test
