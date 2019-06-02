@@ -81,7 +81,8 @@ public class PokemonController {
     @GetMapping
     public ResponseEntity<?> getPokemonSpecies() {
        PokemonResponse defResponse = new PokemonResponse();
-       defResponse.setResults(asList(new PokemonSpecies("fake_name", "fake_url"), new PokemonSpecies("fake_2", "url_2")));
+       defResponse.setResults(asList(new PokemonSpecies("fake_name", "fake_url"),
+                                     new PokemonSpecies("fake_2", "url_2")));
 
        ResponseEntity<PokemonResponse> pokemonResponse = resilienceRestTemplate
                 .getForEntity("https://pokeapi.co/api/v2/pokemon-species/", PokemonResponse.class)
