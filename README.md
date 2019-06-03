@@ -1,9 +1,9 @@
 # resilience-rest-template
-Resilience operations on top of the RestTemplate of the Spring Framework
+Resilience operations over Spring Framework RestTemplate
 
 ### Alert
 
-This project in progress.
+This project a work in progress.
 
 ### Operations
 
